@@ -1,48 +1,23 @@
 <template>
-  <div
-    class="container-fluid"
-    role="tablist"
-  >
+  <div class="container-fluid" role="tablist">
     <div class="row">
       <div class="col-12 col-md-6 offset-md-3">
-        <h1
-          v-once
-          id="faq-heading"
-        >
-          {{ $t('frequentlyAskedQuestions') }}
-        </h1>
-        <div
-          v-for="(entry, index) in faq.questions"
-          :key="index"
-          class="faq-question"
-        >
-          <h2
-            v-once
-            v-b-toggle="entry.heading"
-            role="tab"
-            variant="info"
-            @click="handleClick($event)"
-          >
-            {{ entry.question }}
-          </h2>
-          <b-collapse
-            :id="entry.heading"
-            :visible="isVisible(entry.heading)"
-            accordion="faq"
-            role="tabpanel"
-          >
-            <div
-              v-once
-              v-markdown="entry.web"
-              class="card-body"
-            ></div>
+        <h1 v-once id="faq-heading">{{ $t('frequentlyAskedQuestions') }}</h1>
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" v-model="search" placeholder="Search FAQs">
+        </div>
+        <div v-for="(entry, index) in faqFiltered()"
+        :key="index"
+        class="faq-question">
+          <h2 v-once v-b-toggle="entry.heading"
+          role="tab" variant="info" @click="handleClick($event)">{{ entry.question }}</h2>
+          <b-collapse :id="entry.heading" :visible="isVisible(entry.heading)"
+          accordion="faq" role="tabpanel">
+            <div v-once v-markdown="entry.web" class="card-body"></div>
           </b-collapse>
         </div>
         <hr>
-        <p
-          v-once
-          v-markdown="stillNeedHelp"
-        ></p>
+        <p v-once v-markdown="stillNeedHelp"></p>
       </div>
     </div>
   </div>
@@ -79,6 +54,7 @@
 
 <script>
 import markdownDirective from '@/directives/markdown';
+import { faqFiltered } from './utils/faqFilter.js';
 
 export default {
   directives: {
@@ -89,6 +65,7 @@ export default {
       faq: {},
       headings: [],
       stillNeedHelp: '',
+      search: '',
     };
   },
   async mounted () {
@@ -111,6 +88,9 @@ export default {
       if (!e) return;
       const heading = e.target.nextElementSibling.id;
       window.history.pushState({}, heading, `#${heading}`);
+    },
+    faqFiltered () {
+      return faqFiltered(this.faq, this.search);
     },
   },
 };
